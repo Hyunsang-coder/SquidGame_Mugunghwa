@@ -5,22 +5,60 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     bool isMoving;
+    bool isControl;
+    Animator anim;
+    Vector3 moveVec;
     Rigidbody rb;
+    GameManager manager;
+    AudioManager audioManager;
+
     [SerializeField] float speed = 10f;
-    void Start()
+
+    private void Awake()
     {
+        isControl = true;
+        anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody>();
+        manager = FindObjectOfType<GameManager>();
+        audioManager = FindObjectOfType<AudioManager>();
     }
+    
 
     // Update is called once per frame
     void Update()
     {
 
-        float forwardMove = Input.GetAxis("Vertical") * speed;
-        float sideMove = Input.GetAxis("Horizontal") * speed;
+        if (isControl) 
+        {
+            float vAxis = Input.GetAxis("Vertical");
+            float hAxis = Input.GetAxis("Horizontal");
 
-        forwardMove *= Time.deltaTime;
-        sideMove *= Time.deltaTime;
-        transform.Translate(sideMove, 0, forwardMove);
+            moveVec = new Vector3(hAxis, 0, vAxis).normalized;
+            transform.position += moveVec * speed * Time.deltaTime;
+            transform.LookAt(transform.position + moveVec);
+
+            anim.SetBool("isRun", moveVec != Vector3.zero);
+
+            if (moveVec != Vector3.zero)
+            {
+                audioManager.Play("footStep");
+            }
+        }
+        
+        
+    }
+
+    void OnParticleCollision(GameObject other)
+    {
+        isControl = false;
+        moveVec = Vector3.zero;
+        anim.SetBool("isRun", moveVec != Vector3.zero);
+
+        Debug.Log("Particle hit");
+
+        manager.StopTime();
+        manager.GameOver();
+
+        audioManager.StopPlaying("funnySong");
     }
 }
