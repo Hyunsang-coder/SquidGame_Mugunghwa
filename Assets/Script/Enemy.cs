@@ -94,7 +94,7 @@ public class Enemy : MonoBehaviour
     IEnumerator Check()
     {
         float timeElapsed = 0;
-        float checkDuration = 1f;
+        float checkDuration = 1.8f;
 
         while (timeElapsed < checkDuration)
         {
